@@ -16,7 +16,7 @@ float temp = 0;
 int lastHeading = 0;
 int targetHeading = 0;
 int currentLightDirection = 0;
-int lastLightDirection = 0;
+int lastLightDirection = 0;       //the last direction the solar panel was towards
 
 
 void setup() 
@@ -55,5 +55,3 @@ void activeSearch()
 {
   
 }
-
-void 

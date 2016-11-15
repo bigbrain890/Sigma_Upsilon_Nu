@@ -17,6 +17,10 @@ int lastHeading = 0;          // Last known direction of solar panel
 int targetHeading = 0;        // Where we want the solar panel to point.
 int currentLightDirection = 0;
 int lastLightDirection = 0;   // The last direction the solar panel was towards
+unsigned long int currentTime = 0;
+unsigned long int lastReportTime;
+int reportFreq = 5000;
+
 
 
 void setup() 
@@ -30,6 +34,12 @@ void setup()
 
 void loop() 
 {
+  currentTime = millis();
+  if((currentTime - lastReportTime) >= reportFreq)
+  {
+    dataReport();
+    lastReportTime = currentTime; 
+  }
   collectLightData();
 
 }
@@ -55,3 +65,9 @@ void activeSearch()
 {
   
 }
+
+void dataReport()
+{
+  // Print out air temprature and direction sun based on pannel position.
+}
+

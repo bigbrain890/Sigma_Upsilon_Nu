@@ -1,3 +1,8 @@
+#define SHUTDOWN_SERVO 5
+#define ACTIVATE_SERVO 4
+#define COMPARE_LIGHT_CHANGE 3
+#define CALC_TARG_ANGLE 2
+#define PULL_SENSOR_DATA 1
 #include <Servo.h>
 
 Servo radial, tilt;           // Make two servo objects.
@@ -9,6 +14,7 @@ int photoSensor5 = A4;
 int photoSwitchTop = 3;       // Put a couple of photo resistors on digital pins. Going to try and use them like photo switches.
 int photoSwitchBottom = 4;
 int tempSensor = A5;          // Tempreature sensor for weather data we need to send.
+
 float lightSensorData[4];     // Array used for storing analog photosensor data
 float tiltUpSensor = 0;       // Variables for storing digital photosensor data
 float tiltDownSensor = 0;

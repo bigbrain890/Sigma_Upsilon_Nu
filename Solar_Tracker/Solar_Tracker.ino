@@ -26,6 +26,7 @@ int lastLightDirection = 0;   // The last direction the solar panel was towards
 unsigned long int currentTime = 0;
 unsigned long int lastReportTime;
 int reportFreq = 5000;
+int noLightThresh = 0;        // Set value to minimum light in classroom. Do with function.
 
 
 

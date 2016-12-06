@@ -7,6 +7,8 @@
 #define GO_TO_INITIAL_POSITION 7
 #define ADJUST_INITIAL_TILT 8
 #define ACTIVE_TRACKING 9
+#define TRACK_SUN 3
+
 
 #define VERTICLE 0
 #define FLAT 90
@@ -36,6 +38,8 @@ int maxTiltErrorThresh = 30;
 int startingLightTilt = 0;
 int noLightThresh = 0;        // Set value to minimum light in classroom. Do with function.
 int state = FIND_INITIAL_POSITION;
+int activeTrackingState = 1;
+int solarErrorThresh = 50;
 
 
 void setup() 
@@ -69,6 +73,7 @@ void loop()
     	currentLight = (analogRead(photoSensorLeft) + analogRead(photoSensorRight));
     	if(currentLight > brightestLight)
     	{
+    		brightestLight = currentLight;
     		startingLightDirection = i; 
     		startingLightTilt = 45;
     	}
@@ -77,13 +82,14 @@ void loop()
     }
 
     tilt.write(135);
-    delay(400);
+    delay(1000);
 
-    for(int i = 180; i <=0; i--)
+    for(int i = 180; i >= 0; i--)
     {
  		currentLight = (analogRead(photoSensorLeft) + analogRead(photoSensorRight));
  		if(currentLight > brightestLight)
  		{
+ 			brightestLight = currentLight;
  			startingLightDirection = i;
  			startingLightTilt = 135;
  		}
@@ -100,7 +106,8 @@ void loop()
   	tilt.write(startingLightTilt);
   	currentTilt = startingLightTilt;
   	currentLightDirection = startingLightDirection;
-  	delay(400);
+  	currentLightDirection = startingLightDirection;
+  	delay(1000);
   	state == ADJUST_INITIAL_TILT;
 
   }
@@ -132,6 +139,31 @@ void loop()
   }
   else if (state == ACTIVE_TRACKING)
   {
+  	if(activeTrackingState == SHUTDOWN_SERVO)
+  	{
+  		tilt.detach();
+  		radial.detach();
+  		int leftLight = analogRead(photoSensorLeft);
+  		int rightLight = analogRead(photoSensorRight);
+  		int error = (abs(leftLight - rightLight));
+  		if (error > solarErrorThresh)
+  		{
+  			activeTrackingState = ACTIVATE_SERVO;
+  		}
+  	}
+  	else if (activeTrackingState == ACTIVATE_SERVO)
+  	{
+  		tilt.attach(10);
+  		radial.attach(9);
+  		activeTrackingState = TRACK_SUN;
+  	}
+  	else if (activeTrackingState == TRACK_SUN)
+  	{
+  		int leftLight = analogRead(photoSensorLeft);
+  		int rightLight = analogRead(photoSensorRight);
+  		int error = (abs(leftLight - rightLight)); 
+  		if(error < )
+  	}
 
   }
 }

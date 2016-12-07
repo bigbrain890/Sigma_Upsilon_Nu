@@ -8,6 +8,8 @@
 #define ADJUST_INITIAL_TILT 8
 #define ACTIVE_TRACKING 9
 #define TRACK_SUN 3
+#define LESS_THAN_90 1
+#define GREATER_THAN_90 2
 
 
 #define VERTICLE 0
@@ -39,6 +41,7 @@ int startingLightTilt = 0;
 int noLightThresh = 0;        // Set value to minimum light in classroom. Do with function.
 int state = FIND_INITIAL_POSITION;
 int activeTrackingState = 1;
+int moveDirectionState = LESS_THAN_90;
 int solarErrorThresh = 50;
 
 
@@ -106,7 +109,6 @@ void loop()
   	tilt.write(startingLightTilt);
   	currentTilt = startingLightTilt;
   	currentLightDirection = startingLightDirection;
-  	currentLightDirection = startingLightDirection;
   	delay(1000);
   	state == ADJUST_INITIAL_TILT;
 
@@ -159,10 +161,30 @@ void loop()
   	}
   	else if (activeTrackingState == TRACK_SUN)
   	{
+  		if (currentTilt > 90)
+  		{
+  			moveDirectionState = GREATER_THAN_90;
+  		}
+  		else if (currentTile < 90)
+  		{
+  			moveDirectionState = LESS_THAN_90;
+  		}
+  		int topLight = analogRead(photoSensorTop);
+  		int bottomLight = analogRead(photoSensorBottom);
   		int leftLight = analogRead(photoSensorLeft);
   		int rightLight = analogRead(photoSensorRight);
-  		int error = (abs(leftLight - rightLight)); 
-  		if(error < )
+  		int error = leftLight - rightLight; 
+  		if(abs(error) > solarErrorThresh)
+  		{
+  			if(error > 0)
+  			{
+  				//move right here
+  			}
+  			else if (error < 0)
+  			{
+  				//move left here
+  			}
+  		}
   	}
 
   }

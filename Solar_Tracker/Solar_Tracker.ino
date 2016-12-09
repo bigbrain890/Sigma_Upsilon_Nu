@@ -68,15 +68,15 @@ void loop()
 
   if (state == FIND_INITIAL_POSITION)
   {
-  	int brightestLight = 0;
-  	int currentLight = 0;
+  	int lowestError = 0;
+  	int lightError = 0;
 
     for(int i = 0; i <= 180; i++)
     {
-    	currentLight = (analogRead(photoSensorLeft) + analogRead(photoSensorRight));
-    	if(currentLight > brightestLight)
+    	lightError = (analogRead(photoSensorLeft) + analogRead(photoSensorRight));
+    	if(lightError < lowestError)
     	{
-    		brightestLight = currentLight;
+    		lowestError = lightError;
     		startingLightDirection = i; 
     		startingLightTilt = 45;
     	}
@@ -89,10 +89,10 @@ void loop()
 
     for(int i = 180; i >= 0; i--)
     {
- 		currentLight = (analogRead(photoSensorLeft) + analogRead(photoSensorRight));
- 		if(currentLight > brightestLight)
+ 		lightError = (analogRead(photoSensorLeft) + analogRead(photoSensorRight));
+ 		if(lightError < lowestError)
  		{
- 			brightestLight = currentLight;
+ 			lowestError = lightError;
  			startingLightDirection = i;
  			startingLightTilt = 135;
  		}

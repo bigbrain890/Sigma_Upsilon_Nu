@@ -33,7 +33,7 @@ int currentLightDirection = 0;
 int currentTilt = 0;
 int lastLightDirection = 0;   // The last direction the solar panel was towards
 unsigned long int currentTime = 0;
-unsigned long int lastReportTime;
+unsigned long int lastReportTime = 0;
 int reportFreq = 5000;
 int startingLightDirection = 0;
 int maxTiltErrorThresh = 30;
@@ -68,12 +68,12 @@ void loop()
 
   if (state == FIND_INITIAL_POSITION)
   {
-  	int lowestError = 0;
+  	int lowestError = 180;
   	int lightError = 0;
 
     for(int i = 0; i <= 180; i++)
     {
-    	lightError = (analogRead(photoSensorLeft) + analogRead(photoSensorRight));
+    	lightError = abs((analogRead(photoSensorLeft) - analogRead(photoSensorRight)));
     	if(lightError < lowestError)
     	{
     		lowestError = lightError;
@@ -120,7 +120,7 @@ void loop()
   	int bottomValue = analogRead(photoSensorBottom);
   	int difference = abs(bottomValue - topValue);
 
-  	if(difference > maxTiltErrorThresh)
+  	if(difference >= maxTiltErrorThresh)
   	{
   		if(topValue > bottomValue)
   		{
@@ -165,7 +165,7 @@ void loop()
   		{
   			moveDirectionState = GREATER_THAN_90;
   		}
-  		else if (currentTile < 90)
+  		else if (currentTilt < 90)
   		{
   			moveDirectionState = LESS_THAN_90;
   		}
@@ -188,14 +188,6 @@ void loop()
   	}
 
   }
-}
-
-void collectLightData()
-{
-  lightSensorData[0] = analogRead(photoSensorLeft);
-  lightSensorData[1] = analogRead(photoSensorRight);
-  lightSensorData[2] = analogRead(photoSensorTop);
-  lightSensorData[3] = analogRead(photoSensorBottom);
 }
 
 void adjustTilt()

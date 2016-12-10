@@ -1,8 +1,6 @@
+#include <Servo.h>
 #define SHUTDOWN_SERVO 1
 #define ACTIVATE_SERVO 2
-#define COMPARE_LIGHT_CHANGE 3 
-#define CALC_TARG_ANGLE 4
-#define PULL_SENSOR_DATA 5
 #define FIND_INITIAL_POSITION 6
 #define GO_TO_INITIAL_POSITION 7
 #define ADJUST_INITIAL_TILT 8
@@ -11,10 +9,6 @@
 #define LESS_THAN_90 1
 #define GREATER_THAN_90 2
 
-
-#define VERTICLE 0
-#define FLAT 90
-#include <Servo.h>
 
 Servo radial, tilt;           // Make two servo objects.
 int photoSensorLeft = A0;        // Pin allocation for first 5 photosensors. Going to use analog inputs to get variable readings.
@@ -27,22 +21,19 @@ float lightSensorData[4];     // Array used for storing analog photosensor data
 float temp = 0;               // Variable used for storing tempreature reading.
 float tempF = 0;
 float rawTemp = 0;
-int lastHeading = 0;          // Last known direction of solar panel
-int targetHeading = 0;        // Where we want the solar panel to point.
 int currentLightDirection = 0;
 int currentTilt = 0;
-int lastLightDirection = 0;   // The last direction the solar panel was towards
 unsigned long int currentTime = 0;
 unsigned long int lastReportTime = 0;
 int reportFreq = 5000;
 int startingLightDirection = 0;
-int maxTiltErrorThresh = 30;
+int maxTiltErrorThresh = 10;
 int startingLightTilt = 0;
 int noLightThresh = 0;        // Set value to minimum light in classroom. Do with function.
 int state = FIND_INITIAL_POSITION;
-int activeTrackingState = 1;
+int activeTrackingState = SHUTDOWN_SERVO;
 int moveDirectionState = LESS_THAN_90;
-int solarErrorThresh = 50;
+int solarErrorThresh = 10;
 
 
 void setup() 
@@ -50,7 +41,7 @@ void setup()
   radial.attach(9);                   // Attach the Servos to the perspective pins.
   tilt.attach(10);                    
   Serial.begin(9600);
-  tilt.write(45);
+  tilt.write(20);
   radial.write(0);
   delay(500);
 
@@ -58,7 +49,12 @@ void setup()
 
 void loop() 
 {
-  
+	/*
+  Serial.print(state);
+  Serial.print("   ");
+  Serial.print("Active Tracking State: ");
+  Serial.println(activeTrackingState);
+  */
   currentTime = millis();
   if ((currentTime - lastReportTime) >= reportFreq)
   {
@@ -78,14 +74,14 @@ void loop()
     	{
     		lowestError = lightError;
     		startingLightDirection = i; 
-    		startingLightTilt = 45;
+    		startingLightTilt = 20;
     	}
     	radial.write(i+1);
-    	delay(50);
+    	delay(35);
     }
 
-    tilt.write(135);
-    delay(1000);
+    tilt.write(170);
+    delay(700);
 
     for(int i = 180; i >= 0; i--)
     {
@@ -94,10 +90,10 @@ void loop()
  		{
  			lowestError = lightError;
  			startingLightDirection = i;
- 			startingLightTilt = 135;
+ 			startingLightTilt = 170;
  		}
  		radial.write(i-1);
- 		delay(50);
+ 		delay(35);
     }
 
     state = GO_TO_INITIAL_POSITION;
@@ -110,7 +106,7 @@ void loop()
   	currentTilt = startingLightTilt;
   	currentLightDirection = startingLightDirection;
   	delay(1000);
-  	state == ADJUST_INITIAL_TILT;
+  	state = ADJUST_INITIAL_TILT;
 
   }
 
@@ -161,6 +157,7 @@ void loop()
   	}
   	else if (activeTrackingState == TRACK_SUN)
   	{
+  		/*
   		if (currentTilt > 90)
   		{
   			moveDirectionState = GREATER_THAN_90;
@@ -169,35 +166,73 @@ void loop()
   		{
   			moveDirectionState = LESS_THAN_90;
   		}
-  		int topLight = analogRead(photoSensorTop);
-  		int bottomLight = analogRead(photoSensorBottom);
-  		int leftLight = analogRead(photoSensorLeft);
-  		int rightLight = analogRead(photoSensorRight);
-  		int error = leftLight - rightLight; 
-  		if(abs(error) > solarErrorThresh)
-  		{
-  			if(error > 0)
-  			{
-  				//move right here
-  			}
-  			else if (error < 0)
-  			{
-  				//move left here
-  			}
-  		}
+  		*/
+  		int leftValue = analogRead(photoSensorLeft);
+		int rightValue = analogRead(photoSensorRight)*1.2;
+		int topValue = analogRead(photoSensorTop);
+		int bottomValue = analogRead(photoSensorBottom);
+		int rotationError = leftValue - rightValue;
+		int tiltError = topValue - bottomValue;
+  		if(abs(rotationError) > 5)
+		{
+			if(rotationError > 0)
+			{
+				if(currentTilt > 90)
+				{
+					currentLightDirection++;
+				}
+				else{
+					currentLightDirection--;
+				}
+			}
+			else if (rotationError <0)
+			{
+				if (currentTilt > 90)
+				{
+					currentLightDirection--;
+				}
+				else
+				{
+					currentLightDirection++;
+				}
+				
+			}
+			if(currentLightDirection < 0)
+			{
+				currentLightDirection = 0;
+			}
+			if(currentLightDirection > 180)
+			{
+				currentLightDirection = 180;
+			}
+		}
+
+		if(abs(tiltError) > 5)
+		{
+			if(tiltError > 0)
+			{
+				currentTilt++;
+			}
+			if (tiltError < 0)
+			{
+				currentTilt--;
+			}
+			
+			if(currentTilt < 10)
+			{
+				currentTilt = 10;
+			}
+			if (currentTilt > 170)
+			{
+				currentTilt = 170;
+			}
+		}
+		radial.write(currentLightDirection);
+		tilt.write(currentTilt);
+		delay(15);
   	}
 
   }
-}
-
-void adjustTilt()
-{
-  
-}
-
-void activeSearch()
-{
-  
 }
 
 void dataReport()
